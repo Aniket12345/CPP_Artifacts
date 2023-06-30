@@ -1,7 +1,9 @@
-#############################################################
-# C++ Makefile
-# Jestin PJ
-
+#####
+# Makefile for CPP practice
+#
+# Developer: Jestin PJ and Aniket Fondekar 
+#
+# Date: 30 June 2023 
 # -----usage------------ start
 # make                   (build with default cpp standard 17)
 # make clean
@@ -11,21 +13,33 @@
 # make clean cpp14 run   (clean, build with cpp14 and run)
 # make build
 # -----usage------------ end
+######
 
 # Add author name Here
-AUTHOR_NAME = "Jestin PJ"
+AUTHOR_NAME = "Aniket Fondekar"
 #############################################################
 
 COMPILED_DATE = $$(date +"%Y-%m-%d")
-CXX = g++
-CXXFLAGS = -pedantic -g
-TARGET := Output
+
+TARGET = main
+
+SRC = src
+INC = inc
+BIN = bin
+CC = g++
 CPP_STD = c++17
 
-# Get all .cpp files from the current directory
-SRCS := $(wildcard *.cpp)
-# Substitute .cpp file names to .o file names
-OBJS := $(patsubst %.cpp,%.o,$(SRCS))
+RED = \033[1;31m
+GREEN = \033[1;32m
+BLUE = \033[1;34m
+YELLOW = \033[1;33m
+NC = \033[1;0m
+
+CFLAGS = -Wall -std=$(CPP_STD) -I$(INC)
+
+SOURCE = $(wildcard $(SRC)/*.cpp)
+
+OBJECT = $(patsubst %,$(BIN)/%,$(filter %.o,$(notdir $(SOURCE:.cpp=.o))))
 
 # Default target
 all: cpp17
@@ -39,34 +53,35 @@ cpp20: CPP_STD = c++20
 cpp23: CPP_STD = c++23
 cpp11 cpp14 cpp17 cpp20 cpp23: build
 #############################################################
+	
+build : clean $(BIN)/$(TARGET)
 
-build: CXXFLAGS += "-std=$(CPP_STD)"
-build: clean $(TARGET)
+$(BIN)/$(TARGET) : $(OBJECT) 
+	@echo "Linking..."
+	$(CC) -o $@ $^
+	@echo "Finished"
 
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
-
-%.o: %.cpp
+$(BIN)/%.o: $(SRC)/%.cpp
+	@echo "Compiling... "
 	$(call add_file_banner,$<)
-	$(CXX) $(CXXFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $< -o $@ 
+#.PHONY : run clean help dost
+
+run : $(BIN)/$(TARGET) 
+	@echo "Running..."
+	@./$(BIN)/$(TARGET)
 
 clean:
-	rm -rf $(TARGET) *.o *.exe *.stackdump
-
-run: $(TARGET)
-	clear
-	./$(TARGET)
-
-help:
+	@rm -rf $(OBJECT) $(BIN)/$(TARGET)
+	
+help : 
 	@echo "make (build with default cpp standard 17)"
 	@echo "make clean"
 	@echo "make cpp14 / cpp17 / cpp20 / cpp23"
 	@echo "make run"
 	@echo "make help"
 	@echo "make clean cpp14 run   (clean, build with cpp14, and run)"
-
-.PHONY: all clean run help
-
+	
 ##########################################################################################################################
 # File Header Info
 define add_file_banner
